@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Echart Gauge Rotate Label</title>
+  <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.1.0/echarts.min.js"></script>
+</head>
+<body>
+  <canvas id="myChart" width="300" height="300" style="background: #000;"></canvas>
+  <script>
+    	function initVoltage() {
+				const myChart = echarts.init(document.getElementById('myChart'));
+				const width = myChart.getWidth();
+				const height = myChart.getHeight();
+				const startAngle = 195; // 仪表盘起始角度。圆心 正右手侧为0度，正上方为90度，正左手侧为180度。
+				const endAngle = -15;
+				const splitNumber = 10;
+        const radius = 85;
+				// 圆心 50% 50% 半径 85%
+				const sigleAngle = Math.abs((endAngle - startAngle)) / splitNumber; // 表盘每个刻度的度数
+				const r = (width>height?height:width) * .5 * radius/100 + 4; //  半径 最后一个数字 4 距离刻度线的距离distance
+				
+				const nowValue = 41.2; // 当前电压
+				
+				const min = 0; // 起始刻度
+				const max = 60; // 终止刻度
+				const singleValue = (max - min) / splitNumber; // 每个刻度的值
+				
+				
+				const markData = []; // 标记数据
+				let nowAngle = -15; // 当前度数
+				let markValue = 0;
+				for(let i=0; i<=splitNumber; i++) {
+						let angle = nowAngle % 90;
+						let obj = { name: markValue, value: markValue, x: 0, y: 0, label: { rotate: 0 } };
+						if(nowAngle<0&&nowAngle>-90) {
+							obj.x = width*.5 - r*Math.cos(-angle*(Math.PI/180)); // label的x坐标
+							obj.y = height*0.5 + r*Math.sin(-angle*(Math.PI/180)); // label的y坐标
+							obj.label.rotate = 90 - angle; // label旋转度数
+						} else if(nowAngle===0) {
+							obj.x = width*.5 - r;
+							obj.y = height*0.5;
+							obj.label.rotate = 90;
+						} else if(nowAngle>0&&nowAngle<90) {
+							obj.x = width*.5 - r*Math.cos(angle*(Math.PI/180));
+							obj.y = height*0.5 - r*Math.sin(angle*(Math.PI/180));
+							obj.label.rotate = 90 - angle;
+						} else if(nowAngle===90) {
+							obj.x = width*.5;
+							obj.y = height*0.5 - r;
+							obj.label.rotate = 0;
+						} else if(nowAngle>90&&nowAngle<180) {
+							obj.x = width*.5 + r*Math.cos((90-angle)*(Math.PI/180));
+							obj.y = height*0.5 - r*Math.sin((90-angle)*(Math.PI/180));
+							obj.label.rotate = -angle;
+						} else if(nowAngle===180) {
+							obj.x = width*.5 + r;
+							obj.y = height*0.5;
+							obj.label.rotate = -90;
+						} else if(nowAngle>180&&nowAngle<270) {
+							obj.x = width*.5 + r*Math.cos(angle*(Math.PI/180));
+							obj.y = height*0.5 + r*Math.sin(angle*(Math.PI/180));
+							obj.label.rotate = -angle-90;
+						}	
+						markData.push(obj);
+						nowAngle += sigleAngle;
+						markValue += singleValue;
+				}
+				
+				var option = {
+					series: [
+						{
+							type: 'gauge',
+							title: {
+								color: '#fff'
+							},
+							radius: radius+'%',
+							endAngle,
+							startAngle,
+							min,
+							max,
+							axisLine: {
+								show: true,
+								lineStyle: {
+									color: [[1, '#43c8f9']],
+									width: 1,
+									shadowBlur: 6,
+									shadowColor: '#43c8f9',
+									shadowOffsetY: 6
+								}
+							},
+							splitLine: {
+								distance: 0,
+								lineStyle: {
+									color: '#43c8f9',
+									width: 1
+								}
+							},
+							axisTick: {
+								distance: 0,
+								splitNumber:10,
+								lineStyle: {
+									color: '#43c8f9'
+								}
+							},
+							axisLabel: {
+								show: false
+							},
+							pointer: {
+									offsetCenter: [0, '25%'],
+									icon: 'path://M2090.36389,615.30999 L2090.36389,615.30999 C2091.48372,615.30999 2092.40383,616.194028 2092.44859,617.312956 L2096.90698,728.755929 C2097.05155,732.369577 2094.2393,735.416212 2090.62566,735.56078 C2090.53845,735.564269 2090.45117,735.566014 2090.36389,735.566014 L2090.36389,735.566014 C2086.74736,735.566014 2083.81557,732.63423 2083.81557,729.017692 C2083.81557,728.930412 2083.81732,728.84314 2083.82081,728.755929 L2088.2792,617.312956 C2088.32396,616.194028 2089.24407,615.30999 2090.36389,615.30999 Z',
+									length: '110%',
+									width: 3,
+									itemStyle: {
+											color: new echarts.graphic.LinearGradient(
+                    0, 0, 1, 0,
+                    [
+                        {offset: 0, color: '#43c8f9'},
+                        {offset: 0.3, color: '#43c8f9'},
+                        {offset: 0.5, color: '#eee'},
+                        {offset: 0.7, color: '#43c8f9'},
+                        {offset: 1, color: '#43c8f9'}
+                    ]
+                )
+									}
+							},
+							 anchor: {
+								show: true,
+								size: 10,
+								itemStyle: {
+									color: '#43c8f9',
+									borderColor: '#fff',
+									borderWidth: 2
+								}
+						},
+						title: {
+							color: '#fff',
+							offsetCenter: [0, '-50%']
+						},
+						detail: {
+							color: '#fff',
+							formatter: function(value) {
+								return value.toFixed(2) + 'V';
+							},
+							fontSize: 20,
+							lineHeight: 20,
+							fontWeight: 'normal',
+							offsetCenter: [0, '80%']
+						},
+						markPoint: {
+							symbol: 'image://data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAACXBIWXMAAAsTAAALEwEAmpwYAAAGOWlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDIxLTA0LTIxVDExOjA1OjMxKzA4OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyMS0wNC0yMVQxMTo1MDozNyswODowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyMS0wNC0yMVQxMTo1MDozNyswODowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6ZGE1YTk4NTEtOTVhMS0wYzRiLWJmMmUtYzMxNmExY2Q1YTg0IiB4bXBNTTpEb2N1bWVudElEPSJhZG9iZTpkb2NpZDpwaG90b3Nob3A6NmU0NGZjYjktNGRiNi00YTQ5LWJlODYtYjZlOWJhODEzNWViIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MGZhNTUyZDYtNWQwNi1lZjRjLWJjMjMtYmE3OGQyOTBiMGM1Ij4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDowZmE1NTJkNi01ZDA2LWVmNGMtYmMyMy1iYTc4ZDI5MGIwYzUiIHN0RXZ0OndoZW49IjIwMjEtMDQtMjFUMTE6MDU6MzErMDg6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY29udmVydGVkIiBzdEV2dDpwYXJhbWV0ZXJzPSJmcm9tIGFwcGxpY2F0aW9uL3ZuZC5hZG9iZS5waG90b3Nob3AgdG8gaW1hZ2UvcG5nIi8+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJzYXZlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDpkYTVhOTg1MS05NWExLTBjNGItYmYyZS1jMzE2YTFjZDVhODQiIHN0RXZ0OndoZW49IjIwMjEtMDQtMjFUMTE6NTA6MzcrMDg6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIgc3RFdnQ6Y2hhbmdlZD0iLyIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4cw5jvAAAAIUlEQVQ4jWP8//8/AzUBE1VNGzVw1MBRA0cNHDVwCBkIAGkLAyXt6/wlAAAAAElFTkSuQmCC',
+							label: {
+								show: true,
+								color: '#fff',
+								fontSize: 10,
+								formatter: '{b}V'
+							},
+							data: markData
+						},
+							data: [
+								{
+									name: 'voltage',
+									value: nowValue
+								}
+							]
+						}
+					]
+				}
+				
+				// 使用刚指定的配置项和数据显示图表。
+				myChart.setOption(option);
+			}
+      initVoltage();
+  </script>
+</body>
+</html>
